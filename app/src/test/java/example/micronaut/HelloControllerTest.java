@@ -24,7 +24,8 @@ public class HelloControllerTest {
         HttpRequest<String> request = HttpRequest.GET("/hello/sofus"); 
         String body = client.toBlocking().retrieve(request);
 
-        assertNotNull(body);
+        // assertNotNull(body);
+        assertNotNull(null);
         assertEquals("Hello sofus", body);
     }
     @Test
