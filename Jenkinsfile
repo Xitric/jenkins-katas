@@ -36,9 +36,9 @@ pipeline {
             sh 'ci/build-app.sh'
             archiveArtifacts 'app/build/libs/'
             stash excludes: '.git', name: 'code'
-            sh 'ls'
-            deleteDir()
-            sh 'ls'
+            //sh 'ls'
+            //deleteDir()
+            //sh 'ls'
           }
         }
         
