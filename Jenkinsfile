@@ -105,6 +105,9 @@ pipeline {
             skipDefaultCheckout true
         }
         steps {
+            // Only works because build and push are running on the same node.
+            // Otherwise the Docker repository would be on a different machine.
+            // We should configure this and the previous step to run on the same node.
             unstash 'dockerimg'
             sh 'ci/component-test.sh'
         }
