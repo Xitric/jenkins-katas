@@ -38,6 +38,7 @@ pipeline {
             sh 'ls'
             deleteDir()
             sh 'ls'
+            stash excludes: '.git', name: 'code'
           }
         }
         
