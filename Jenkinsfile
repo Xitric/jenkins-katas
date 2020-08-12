@@ -65,7 +65,21 @@ pipeline {
       }
     }
     
-    stage('Push Docker app') {
+    stage('Build Docker') {
+        options {
+            skipDefaultCheckout true
+        }
+        steps {
+            unstash 'code' // Retrieve the recently updated files from master
+            sh 'ci/build-docker.sh'
+            stash name: 'dockerimg'
+        }
+    }
+    
+    stage('Push Docker') {
+        when {
+            branch 'master'
+        }
         options {
             skipDefaultCheckout true
         }
@@ -75,10 +89,24 @@ pipeline {
             DOCKERCREDS = credentials('docker_login') //use the credentials just created in this stage
         }
         steps {
-            unstash 'code' // Retrieve the recently updated files from master
-            sh 'ci/build-docker.sh'
+            unstash 'dockerimg'
             sh 'echo "$DOCKERCREDS_PSW" | docker login -u "$DOCKERCREDS_USR" --password-stdin' //login to docker hub with the credentials above
             sh 'ci/push-docker.sh'
+        }
+    }
+    
+    stage('Component test') {
+        when {
+            not {
+                branch pattern: "dev/\\.+", comparator: "REGEXP"
+            }
+        }
+        options {
+            skipDefaultCheckout true
+        }
+        steps {
+            unstash 'dockerimg'
+            sh 'ci/component-test.sh'
         }
     }
 
