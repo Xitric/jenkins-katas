@@ -1,7 +1,7 @@
 pipeline {
   agent any
   environment {
-    docker_usernme = 'xitric'
+    docker_username = 'xitric'
   }
   stages {
     stage('Clone down') {
