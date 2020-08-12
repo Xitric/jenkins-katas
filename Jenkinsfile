@@ -98,7 +98,7 @@ pipeline {
     stage('Component test') {
         when {
             not {
-                branch pattern: "dev/\\.+", comparator: "REGEXP"
+                branch pattern: "dev/\.+", comparator: "REGEXP"
             }
         }
         options {
