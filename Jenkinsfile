@@ -1,15 +1,18 @@
 pipeline {
-  agent any
+  agent any // If not overridden, just run on any node
+  
   environment {
     docker_username = 'xitric'
   }
+  
   stages {
     stage('Clone down') {
         //agent {
         //    label 'host'
         //}
         steps {
-            stash excludes: '.git', name: 'code'
+            // Clones by default
+            stash excludes: '.git', name: 'code' // Then stash on master
         }
     }
     
@@ -22,20 +25,20 @@ pipeline {
         }
 
         stage('Build app') {
-          agent {
+          agent { // Override the root agent any, run in Docker
             docker {
               image 'gradle:jdk11'
             }
 
           }
           options {
-              skipDefaultCheckout true
+              skipDefaultCheckout true // Skip cloning
           }
           steps {
-            unstash 'code'
+            unstash 'code' // Retrieve stashed code from master
             sh 'ci/build-app.sh'
             archiveArtifacts 'app/build/libs/'
-            stash excludes: '.git', name: 'code'
+            stash excludes: '.git', name: 'code' // Put new changes into master
             //sh 'ls'
             //deleteDir()
             //sh 'ls'
@@ -67,10 +70,12 @@ pipeline {
             skipDefaultCheckout true
         }
         environment {
+            // Retrieve credentials from Jenkins credential store
+            // Saved as DOCKERCREDS_USR and DOCKERCREDS_PSW
             DOCKERCREDS = credentials('docker_login') //use the credentials just created in this stage
         }
         steps {
-            unstash 'code' //unstash the repository code
+            unstash 'code' // Retrieve the recently updated files from master
             sh 'ci/build-docker.sh'
             sh 'echo "$DOCKERCREDS_PSW" | docker login -u "$DOCKERCREDS_USR" --password-stdin' //login to docker hub with the credentials above
             sh 'ci/push-docker.sh'
@@ -79,6 +84,7 @@ pipeline {
 
   }
   
+  // Run deleteDir after every stage of this pipeline to clean up
   post {
     always {
         deleteDir()
