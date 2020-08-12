@@ -97,9 +97,13 @@ pipeline {
     
     stage('Component test') {
         when {
-            not {
-                branch pattern: "dev/.+", comparator: "REGEXP"
-            }
+            //not {
+            //    branch pattern: "dev/.+", comparator: "REGEXP"
+            //}
+          anyOf {
+            branch 'master'
+            changeRequest()
+          }
         }
         options {
             skipDefaultCheckout true
